@@ -3,6 +3,7 @@ const router = express.Router();
 const Customer = require("../models").Customer;
 const log = require("../log");
 
+//add customer
 router.post("/create", async (req, res) => {
   try {
     const customer = await Customer.create(req.body);
@@ -12,6 +13,7 @@ router.post("/create", async (req, res) => {
   }
 });
 
+//get customers
 router.get("/getCustomers", async (req, res) => {
   try {
     const customers = await Customer.findAll();
@@ -21,6 +23,7 @@ router.get("/getCustomers", async (req, res) => {
   }
 });
 
+//get customer
 router.get("/getCustomer/:id", async (req, res) => {
   try {
     const customer = await Customer.findByPk(req.params.id);
@@ -30,6 +33,7 @@ router.get("/getCustomer/:id", async (req, res) => {
   }
 });
 
+//update customer
 router.put("/updateCustomer/:id", async (req, res) => {
   try {
     const customer = await Customer.findByPk(req.params.id);
