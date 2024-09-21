@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Vehicle = require("../models").Vehicle;
+const { Vehicle, Customer, Sequelize } = require("../models");
 const log = require("../log");
 
 router.post("/create", async (req, res) => {
@@ -14,7 +14,34 @@ router.post("/create", async (req, res) => {
 
 router.get("/getVehicles", async (req, res) => {
   try {
-    const vehicles = await Vehicle.findAll();
+    const vehicles = await Vehicle.findAll({
+      attributes: [
+        [
+          Sequelize.fn(
+            "CONCAT",
+            Sequelize.col("customer.name"),
+            " ",
+            Sequelize.fn("COALESCE", Sequelize.col("customer.surname"), "")
+          ),
+          "name",
+        ],
+        "regNo",
+        "vin",
+        "engineNo",
+        "make",
+        "model",
+        "color",
+        "year",
+        "bodyType",
+      ],
+      include: [
+        {
+          model: Customer,
+          as: "customer",
+          attributes: [],
+        },
+      ],
+    });
     res.status(200).json(vehicles);
   } catch (error) {
     log.error("Error in getting vehicles", error);
@@ -23,7 +50,35 @@ router.get("/getVehicles", async (req, res) => {
 
 router.get("/getVehicle/:id", async (req, res) => {
   try {
-    const vehicle = await Vehicle.findByPk(req.params.id);
+    const vehicle = await Vehicle.findOne({
+      where: { vehicleId: req.params.id },
+      attributes: [
+        [
+          Sequelize.fn(
+            "CONCAT",
+            Sequelize.col("customer.name"),
+            " ",
+            Sequelize.fn("COALESCE", Sequelize.col("customer.surname"), "")
+          ),
+          "name",
+        ],
+        "regNo",
+        "vin",
+        "engineNo",
+        "make",
+        "model",
+        "color",
+        "year",
+        "bodyType",
+      ],
+      include: [
+        {
+          model: Customer,
+          as: "customer",
+          attributes: [],
+        },
+      ],
+    });
     res.status(200).json(vehicle);
   } catch (error) {
     log.error("Error in getting vehicle", error);

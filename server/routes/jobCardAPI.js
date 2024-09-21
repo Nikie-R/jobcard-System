@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const jobcard = require("../models").JobCard;
+const {JobCard, Sequelize, Customer, Vehicle }= require("../models");
 const log = require("../log");
 
 //create jobcard
 router.post("/create", async (req, res) => {
   try {
-    const jobcard = await jobcard.create(req.body);
+    const jobcard = await JobCard.create(req.body);
     res.status(201).json(jobcard);
   } catch (error) {
     log.error("Error in creating jobcard", error);
@@ -16,7 +16,45 @@ router.post("/create", async (req, res) => {
 //get jobcards
 router.get("/getJobCards", async (req, res) => {
   try {
-    const jobcards = await jobcard.findAll();
+    const jobcards = await JobCard.findAll({
+      attributes: [
+        [
+          Sequelize.fn(
+            "CONCAT",
+            Sequelize.col("customer.name"),
+            " ",
+            Sequelize.fn("COALESCE", Sequelize.col("customer.surname"), "")
+          ),
+          "name",
+        ],
+        "jobCardId",
+        "date",
+        "kilometers",
+        "fuelLevel",
+        "battery",
+        "triangle",
+        "spareTyre",
+        "jack",
+        "complaint",
+        "status"
+      ],
+      include: [
+        {
+          model: Customer,
+          as: "customer",
+          attributes: [], // No customer attributes included, only for the name concatenation
+        },
+        {
+          model: Vehicle,
+          as: "vehicle",
+          attributes: [
+            "regNo",
+            "make",
+            "model",
+          ],
+        },
+      ],
+    });
     res.status(200).json(jobcards);
   } catch (error) {
     log.error("Error in getting jobcards", error);
@@ -26,7 +64,7 @@ router.get("/getJobCards", async (req, res) => {
 //get jobcard
 router.get("/getJobCard/:id", async (req, res) => {
   try {
-    const jobcard = await jobcard.findByPk(req.params.id);
+    const jobcard = await JobCard.findByPk(req.params.id);
     res.status(200).json(jobcard);
   } catch (error) {
     log.error("Error in getting jobcard", error);
@@ -36,7 +74,7 @@ router.get("/getJobCard/:id", async (req, res) => {
 //update jobcard
 router.put("/updateJobCard/:id", async (req, res) => {
   try {
-    const jobcard = await jobcard.findByPk(req.params.id);
+    const jobcard = await JobCard.findByPk(req.params.id);
     await jobcard.update(req.body);
     res.status(200).json(jobcard);
   } catch (error) {
@@ -47,7 +85,7 @@ router.put("/updateJobCard/:id", async (req, res) => {
 //delete jobcard
 router.delete("/deleteJobCard/:id", async (req, res) => {
   try {
-    const jobcard = await jobcard.findByPk(req.params.id);
+    const jobcard = await JobCard.findByPk(req.params.id);
     await jobcard.destroy();
     res.status(200).json(jobcard);
   } catch (error) {

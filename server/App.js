@@ -3,7 +3,7 @@ const { sequelize } = require("./models");
 const morgan = require("morgan");
 const log = require("./log");
 const setupRoutes = require("./setupRoutes");
-
+const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 3001;
 
@@ -11,6 +11,7 @@ app.use(express.json());
 app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms")
 );
+app.use(cors(origins = process.env.CLIENT_URL || "http://localhost:3000"));
 
 // Test database connection
 sequelize
